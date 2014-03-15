@@ -1,0 +1,14 @@
+{
+  "name": "atom-2048",
+  "main": "./lib/atom-2048",
+  "version": "0.0.0",
+  "description": "A short description of your package",
+  "activationEvents": ["atom-2048:toggle"],
+  "repository": "https://github.com/atom/atom-2048",
+  "license": "MIT",
+  "engines": {
+    "atom": ">0.50.0"
+  },
+  "dependencies": {
+  }
+}
