@@ -4,33 +4,33 @@ module.exports =
 class Atom2048View extends View
   @content: ->
     @div class: 'atom-2048 overlay from-top game-container', =>
-      @div class: 'atom-2048 game-message', =>
-        @p "This is p element!"
-        @div class: 'atom-2048 lower', =>
-          @a "Keep going", class: 'atom-2048 keep-going-button'
-          @a "Try again", class: 'atom-2048 retry-button'
-      @div class: 'atom-2048 grid-container', =>
-        @div class: 'atom-2048 grid-row', =>
-          @div class: 'atom-2048 grid-cell'
-          @div class: 'atom-2048 grid-cell'
-          @div class: 'atom-2048 grid-cell'
-          @div class: 'atom-2048 grid-cell'
-        @div class: 'atom-2048 grid-row', =>
-          @div class: 'atom-2048 grid-cell'
-          @div class: 'atom-2048 grid-cell'
-          @div class: 'atom-2048 grid-cell'
-          @div class: 'atom-2048 grid-cell'
-        @div class: 'atom-2048 grid-row', =>
-          @div class: 'atom-2048 grid-cell'
-          @div class: 'atom-2048 grid-cell'
-          @div class: 'atom-2048 grid-cell'
-          @div class: 'atom-2048 grid-cell'
-        @div class: 'atom-2048 grid-row', =>
-          @div class: 'atom-2048 grid-cell'
-          @div class: 'atom-2048 grid-cell'
-          @div class: 'atom-2048 grid-cell'
-          @div class: 'atom-2048 grid-cell'
-      @div class:'atom-2048 tile-container'
+      @div class: 'game-message', =>
+        @p
+        @div class: 'lower', =>
+          @a "Keep going", class: 'keep-going-button'
+          @a "Try again", class: 'retry-button'
+      @div class: 'grid-container', =>
+        @div class: 'grid-row', =>
+          @div class: 'grid-cell'
+          @div class: 'grid-cell'
+          @div class: 'grid-cell'
+          @div class: 'grid-cell'
+        @div class: 'grid-row', =>
+          @div class: 'grid-cell'
+          @div class: 'grid-cell'
+          @div class: 'grid-cell'
+          @div class: 'grid-cell'
+        @div class: 'grid-row', =>
+          @div class: 'grid-cell'
+          @div class: 'grid-cell'
+          @div class: 'grid-cell'
+          @div class: 'grid-cell'
+        @div class: 'grid-row', =>
+          @div class: 'grid-cell'
+          @div class: 'grid-cell'
+          @div class: 'grid-cell'
+          @div class: 'grid-cell'
+      @div class:'tile-container'
 
   initialize: (serializeState) ->
     atom.workspaceView.command "atom-2048:toggle", => @toggle()
@@ -43,7 +43,6 @@ class Atom2048View extends View
     @detach()
 
   toggle: ->
-    console.log "Atom2048View was toggled!"
     if @hasParent()
       @detach()
     else
