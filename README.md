@@ -1,5 +1,10 @@
 # atom-2048 package
+Playing the interesting 2048 game right inside atom.
 
-A short description of your package.
+![2048-in-atom](2048-in-atom.png)
 
-![A screenshot of your spankin' package](https://f.cloud.github.com/assets/69169/2290250/c35d867a-a017-11e3-86be-cd7c5bf3ff9b.gif)
+## WARNING!!!
+Still in progress, this is a buggy version!
+
+## Credits
+Credit goes to the fantastic [2048](https://github.com/gabrielecirulli/2048) game and the [original version 1024](https://play.google.com/store/apps/details?id=com.veewo.a1024).
