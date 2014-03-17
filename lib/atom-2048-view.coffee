@@ -219,8 +219,8 @@ KeyboardInputManager::listener = (event) ->
   modifiers = event.altKey or event.ctrlKey or event.metaKey or event.shiftKey
   mapped = keymap[event.which]
   unless modifiers
+    event.preventDefault()
     if mapped isnt `undefined`
-      event.preventDefault()
       @emit "move", mapped
     @restart.bind(this) event  if event.which is 32
   return
@@ -667,7 +667,7 @@ class Atom2048View extends View
             @div 0, class: 'best-container'
         @div class: 'game-container', =>
           @div class: 'game-message', =>
-            @p
+            @p " "
             @div class: 'lower', =>
               @a "Keep going", class: 'keep-playing-button'
               @a "Try again", class: 'retry-button'
