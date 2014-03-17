@@ -661,7 +661,7 @@ class Atom2048View extends View
     @div class: 'atom-2048 overlay from-top', =>
       @div class: 'container', =>
         @div class: 'heading', =>
-          @h1 class: 'title', =>
+          @h1 "2048", class: 'my-title', =>
           @div class: 'scores-container', =>
             @div 0, class: 'score-container'
             @div 0, class: 'best-container'
