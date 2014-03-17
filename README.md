@@ -1,7 +1,7 @@
 # atom-2048 package
 Playing the interesting 2048 game right inside atom.
 
-![2048-in-atom](https://raw.github.com/void-main/atom-2048/master/2048-in-atom.png)
+![2048-in-atom](https://raw.github.com/void-main/atom-2048/master/2048-in-atom.gif)
 
 ## WARNING!!!
 Still in progress, this is a buggy version!
