@@ -188,10 +188,6 @@ Grid::withinBounds = (position) ->
   position.x >= 0 and position.x < @size and position.y >= 0 and position.y < @size
 
 keymap =
-  38: 0
-  39: 1
-  40: 2
-  37: 3
   75: 0
   76: 1
   74: 2
