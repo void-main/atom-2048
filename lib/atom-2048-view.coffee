@@ -299,7 +299,8 @@ HTMLActuator::actuate = (grid, metadata) ->
   return
 
 HTMLActuator::clearContainer = (container) ->
-  container.removeChild container.firstChild  while container.firstChild
+  if container
+    container.removeChild container.firstChild  while container.firstChild
   return
 
 HTMLActuator::addTile = (tile) ->
@@ -661,34 +662,41 @@ GameManager::positionsEqual = (first, second) ->
 module.exports =
 class Atom2048View extends View
   @content: ->
-    @div class: 'atom-2048 overlay from-top game-container', =>
-      @div class: 'game-message', =>
-        @p
-        @div class: 'lower', =>
-          @a "Keep going", class: 'keep-playing-button'
-          @a "Try again", class: 'retry-button'
-      @div class: 'grid-container', =>
-        @div class: 'grid-row', =>
-          @div class: 'grid-cell'
-          @div class: 'grid-cell'
-          @div class: 'grid-cell'
-          @div class: 'grid-cell'
-        @div class: 'grid-row', =>
-          @div class: 'grid-cell'
-          @div class: 'grid-cell'
-          @div class: 'grid-cell'
-          @div class: 'grid-cell'
-        @div class: 'grid-row', =>
-          @div class: 'grid-cell'
-          @div class: 'grid-cell'
-          @div class: 'grid-cell'
-          @div class: 'grid-cell'
-        @div class: 'grid-row', =>
-          @div class: 'grid-cell'
-          @div class: 'grid-cell'
-          @div class: 'grid-cell'
-          @div class: 'grid-cell'
-      @div class:'tile-container'
+    @div class: 'atom-2048 overlay from-top', =>
+      @div class: 'container', =>
+        @div class: 'heading', =>
+          @h1 class: 'title', =>
+          @div class: 'scores-container', =>
+            @div 0, class: 'score-container'
+            @div 0, class: 'best-container'
+        @div class: 'game-container', =>
+          @div class: 'game-message', =>
+            @p
+            @div class: 'lower', =>
+              @a "Keep going", class: 'keep-playing-button'
+              @a "Try again", class: 'retry-button'
+          @div class: 'grid-container', =>
+            @div class: 'grid-row', =>
+              @div class: 'grid-cell'
+              @div class: 'grid-cell'
+              @div class: 'grid-cell'
+              @div class: 'grid-cell'
+            @div class: 'grid-row', =>
+              @div class: 'grid-cell'
+              @div class: 'grid-cell'
+              @div class: 'grid-cell'
+              @div class: 'grid-cell'
+            @div class: 'grid-row', =>
+              @div class: 'grid-cell'
+              @div class: 'grid-cell'
+              @div class: 'grid-cell'
+              @div class: 'grid-cell'
+            @div class: 'grid-row', =>
+              @div class: 'grid-cell'
+              @div class: 'grid-cell'
+              @div class: 'grid-cell'
+              @div class: 'grid-cell'
+          @div class:'tile-container'
 
   initialize: (serializeState) ->
     atom.workspaceView.command "atom-2048:toggle", => @toggle()
