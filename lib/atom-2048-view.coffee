@@ -1,5 +1,11 @@
 {View} = require 'atom'
-
+Tile = (position, value) ->
+  @x = position.x
+  @y = position.y
+  @value = value or 2
+  @previousPosition = null
+  @mergedFrom = null # Tracks tiles that merged together
+  return
 Grid = (size) ->
   @size = size
   @cells = []
@@ -17,6 +23,23 @@ Grid = (size) ->
 # Check if the specified cell is taken
 
 # Inserts a tile at its position
+# Up
+# Right
+# Down
+# Left
+# vim keybindings
+# W
+# D
+# S
+# A
+KeyboardInputManager = ->
+  KeyboardInputManager::events = {}
+  KeyboardInputManager::listen()
+  return
+
+# Listen to swipe events
+
+# (right : left) : (down : up)
 HTMLActuator = ->
   @tileContainer = document.querySelector(".tile-container")
   @scoreContainer = document.querySelector(".score-container")
@@ -26,8 +49,6 @@ HTMLActuator = ->
   return
 # You lose
 # You win!
-
-# Continues the game (both restart and keep playing)
 
 # We can't use classlist because it somehow glitches when replacing classes
 
@@ -41,40 +62,18 @@ HTMLActuator = ->
 # Put the tile on the board
 
 # IE only takes one value to remove at a time.
-KeyboardInputManager = ->
-  @events = {}
-  @listen()
-  return
-# Up
-# Right
-# Down
-# Left
-# vim keybindings
-# W
-# D
-# S
-# A
 
-# Listen to swipe events
-
-# (right : left) : (down : up)
+# Continues the game (both restart and keep playing)
 LocalScoreManager = ->
   @key = "bestScore"
   supported = @localStorageSupported()
   @storage = (if supported then window.localStorage else window.fakeStorage)
   return
-Tile = (position, value) ->
-  @x = position.x
-  @y = position.y
-  @value = value or 2
-  @previousPosition = null
-  @mergedFrom = null # Tracks tiles that merged together
-  return
 GameManager = (size, InputManager, Actuator, ScoreManager) ->
   @size = size # Size of the grid
-  @inputManager = new InputManager()
-  @scoreManager = new ScoreManager()
-  @actuator = new Actuator()
+  @inputManager = new InputManager
+  @scoreManager = new ScoreManager
+  @actuator = new Actuator
   @startTiles = 2
   @inputManager.on "move", @move.bind(this)
   @inputManager.on "restart", @restart.bind(this)
@@ -109,6 +108,18 @@ GameManager = (size, InputManager, Actuator, ScoreManager) ->
       return
   return
 )()
+Tile::savePosition = ->
+  @previousPosition =
+    x: @x
+    y: @y
+
+  return
+
+Tile::updatePosition = (position) ->
+  @x = position.x
+  @y = position.y
+  return
+
 Grid::build = ->
   x = 0
 
@@ -176,6 +187,96 @@ Grid::removeTile = (tile) ->
 Grid::withinBounds = (position) ->
   position.x >= 0 and position.x < @size and position.y >= 0 and position.y < @size
 
+keymap =
+  38: 0
+  39: 1
+  40: 2
+  37: 3
+  75: 0
+  76: 1
+  74: 2
+  72: 3
+  87: 0
+  68: 1
+  83: 2
+  65: 3
+
+KeyboardInputManager::on = (event, callback) ->
+  KeyboardInputManager::events[event] = []  unless KeyboardInputManager::events[event]
+  KeyboardInputManager::events[event].push callback
+  return
+
+KeyboardInputManager::emit = (event, data) ->
+  callbacks = @events[event]
+  if callbacks
+    callbacks.forEach (callback) ->
+      callback data
+      return
+
+  return
+
+listenerFunc = (event) ->
+  KeyboardInputManager::listener event
+  return
+
+KeyboardInputManager::listener = (event) ->
+  modifiers = event.altKey or event.ctrlKey or event.metaKey or event.shiftKey
+  mapped = keymap[event.which]
+  unless modifiers
+    if mapped isnt `undefined`
+      event.preventDefault()
+      @emit "move", mapped
+    @restart.bind(this) event  if event.which is 32
+  return
+
+KeyboardInputManager::listen = ->
+  self = this
+  document.addEventListener "keydown", listenerFunc
+  retry = document.querySelector(".retry-button")
+  retry.addEventListener "click", @restart.bind(this)
+  retry.addEventListener "touchend", @restart.bind(this)
+  keepPlaying = document.querySelector(".keep-playing-button")
+  keepPlaying.addEventListener "click", @keepPlaying.bind(this)
+  keepPlaying.addEventListener "touchend", @keepPlaying.bind(this)
+  touchStartClientX = undefined
+  touchStartClientY = undefined
+  gameContainer = document.getElementsByClassName("game-container")[0]
+  gameContainer.addEventListener "touchstart", (event) ->
+    return  if event.touches.length > 1
+    touchStartClientX = event.touches[0].clientX
+    touchStartClientY = event.touches[0].clientY
+    event.preventDefault()
+    return
+
+  gameContainer.addEventListener "touchmove", (event) ->
+    event.preventDefault()
+    return
+
+  gameContainer.addEventListener "touchend", (event) ->
+    return  if event.touches.length > 0
+    dx = event.changedTouches[0].clientX - touchStartClientX
+    absDx = Math.abs(dx)
+    dy = event.changedTouches[0].clientY - touchStartClientY
+    absDy = Math.abs(dy)
+    self.emit "move", (if absDx > absDy then ((if dx > 0 then 1 else 3)) else ((if dy > 0 then 2 else 0)))  if Math.max(absDx, absDy) > 10
+    return
+
+  return
+
+KeyboardInputManager::stopListen = ->
+  document.removeEventListener "keydown", listenerFunc
+  return
+
+KeyboardInputManager::restart = (event) ->
+  event.preventDefault()
+  @emit "restart"
+  return
+
+KeyboardInputManager::keepPlaying = (event) ->
+  event.preventDefault()
+  @emit "keepPlaying"
+  return
+
 HTMLActuator::actuate = (grid, metadata) ->
   self = this
   window.requestAnimationFrame ->
@@ -195,10 +296,6 @@ HTMLActuator::actuate = (grid, metadata) ->
       else self.message true  if metadata.won
     return
 
-  return
-
-HTMLActuator::continueKeep = ->
-  @clearMessage()
   return
 
 HTMLActuator::clearContainer = (container) ->
@@ -286,92 +383,14 @@ HTMLActuator::clearMessage = ->
   @messageContainer.classList.remove "game-over"
   return
 
-KeyboardInputManager::on = (event, callback) ->
-  @events[event] = []  unless @events[event]
-  @events[event].push callback
-  return
-
-KeyboardInputManager::emit = (event, data) ->
-  callbacks = @events[event]
-  if callbacks
-    callbacks.forEach (callback) ->
-      callback data
-      return
-
-  return
-
-KeyboardInputManager::listen = ->
-  self = this
-  map =
-    38: 0
-    39: 1
-    40: 2
-    37: 3
-    75: 0
-    76: 1
-    74: 2
-    72: 3
-    87: 0
-    68: 1
-    83: 2
-    65: 3
-
-  document.addEventListener "keydown", (event) ->
-    modifiers = event.altKey or event.ctrlKey or event.metaKey or event.shiftKey
-    mapped = map[event.which]
-    unless modifiers
-      if mapped isnt `undefined`
-        event.preventDefault()
-        self.emit "move", mapped
-      self.restart.bind(self) event  if event.which is 32
-    return
-
-  retry = document.querySelector(".retry-button")
-  retry.addEventListener "click", @restart.bind(this)
-  retry.addEventListener "touchend", @restart.bind(this)
-  keepPlaying = document.querySelector(".keep-playing-button")
-  keepPlaying.addEventListener "click", @keepPlaying.bind(this)
-  keepPlaying.addEventListener "touchend", @keepPlaying.bind(this)
-  touchStartClientX = undefined
-  touchStartClientY = undefined
-  gameContainer = document.getElementsByClassName("game-container")[0]
-  gameContainer.addEventListener "touchstart", (event) ->
-    return  if event.touches.length > 1
-    touchStartClientX = event.touches[0].clientX
-    touchStartClientY = event.touches[0].clientY
-    event.preventDefault()
-    return
-
-  gameContainer.addEventListener "touchmove", (event) ->
-    event.preventDefault()
-    return
-
-  gameContainer.addEventListener "touchend", (event) ->
-    return  if event.touches.length > 0
-    dx = event.changedTouches[0].clientX - touchStartClientX
-    absDx = Math.abs(dx)
-    dy = event.changedTouches[0].clientY - touchStartClientY
-    absDy = Math.abs(dy)
-    self.emit "move", (if absDx > absDy then ((if dx > 0 then 1 else 3)) else ((if dy > 0 then 2 else 0)))  if Math.max(absDx, absDy) > 10
-    return
-
-  return
-
-KeyboardInputManager::restart = (event) ->
-  event.preventDefault()
-  @emit "restart"
-  return
-
-KeyboardInputManager::keepPlaying = (event) ->
-  event.preventDefault()
-  @emit "keepPlaying"
+HTMLActuator::continueKeep = ->
+  @clearMessage()
   return
 
 window.fakeStorage =
   _data: {}
   setItem: (id, val) ->
     @_data[id] = String(val)
-    @_data[id]
 
   getItem: (id) ->
     (if @_data.hasOwnProperty(id) then @_data[id] else `undefined`)
@@ -381,7 +400,6 @@ window.fakeStorage =
 
   clear: ->
     @_data = {}
-    @_data
 
 LocalScoreManager::localStorageSupported = ->
   testKey = "test"
@@ -399,18 +417,6 @@ LocalScoreManager::get = ->
 
 LocalScoreManager::set = (score) ->
   @storage.setItem @key, score
-  return
-
-Tile::savePosition = ->
-  @previousPosition =
-    x: @x
-    y: @y
-
-  return
-
-Tile::updatePosition = (position) ->
-  @x = position.x
-  @y = position.y
   return
 
 
@@ -696,6 +702,7 @@ class Atom2048View extends View
 
   toggle: ->
     if @hasParent()
+      KeyboardInputManager::stopListen()
       @detach()
     else
       window.requestAnimationFrame ->
