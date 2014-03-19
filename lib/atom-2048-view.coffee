@@ -228,7 +228,6 @@ KeyboardInputManager::listener = (event) ->
 
 KeyboardInputManager::listen = ->
   self = this
-  console.log(this)
   document.addEventListener "keydown", listenerFunc
   retry = document.querySelector(".retry-button")
   retry.addEventListener "click", @restart.bind(this)
