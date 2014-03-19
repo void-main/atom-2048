@@ -219,14 +219,16 @@ KeyboardInputManager::listener = (event) ->
   modifiers = event.altKey or event.ctrlKey or event.metaKey or event.shiftKey
   mapped = keymap[event.which]
   unless modifiers
-    event.preventDefault()
+    event.preventDefault() unless event.which is 66 # b key for boss
     if mapped isnt `undefined`
       @emit "move", mapped
     @restart.bind(this) event  if event.which is 32
+
   return
 
 KeyboardInputManager::listen = ->
   self = this
+  console.log(this)
   document.addEventListener "keydown", listenerFunc
   retry = document.querySelector(".retry-button")
   retry.addEventListener "click", @restart.bind(this)
@@ -657,6 +659,8 @@ GameManager::positionsEqual = (first, second) ->
 
 module.exports =
 class Atom2048View extends View
+  @bossMode = false
+
   @content: ->
     @div class: 'atom-2048 overlay from-top', =>
       @div class: 'container', =>
@@ -695,7 +699,16 @@ class Atom2048View extends View
           @div class:'tile-container'
 
   initialize: (serializeState) ->
+    @bossMode = false
     atom.workspaceView.command "atom-2048:toggle", => @toggle()
+
+    atom.workspaceView.command "atom-2048:bossComing", (e) =>
+      if @hasParent()
+        @bossComing()
+      else
+        e.abortKeyBinding()
+
+    atom.workspaceView.command "atom-2048:bossAway", => @bossAway()
 
   # Returns an object that can be retrieved when package is activated
   serialize: ->
@@ -703,6 +716,16 @@ class Atom2048View extends View
   # Tear down any state and detach
   destroy: ->
     @detach()
+
+  bossComing: ->
+    KeyboardInputManager::stopListen()
+    @bossMode = true
+    @detach()
+
+  bossAway: ->
+    if @bossMode
+      atom.workspaceView.append(this)
+      KeyboardInputManager::listen()
 
   toggle: ->
     if @hasParent()
