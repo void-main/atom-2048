@@ -803,7 +803,7 @@ class Atom2048View extends View
       atom.workspaceView.append(this)
 
       atom.emit "achievement:unlock",
-        name: "Hello, adventurer!!"
+        name: "Hello, adventurer!!!"
         requirement: "Launch 2048 game in atom"
         category: "Game Play"
         package: "atom-2048"
