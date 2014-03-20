@@ -535,6 +535,7 @@ GameManager::move = (direction) ->
         # Only one merger per row traversal?
         if next and next.value is tile.value and not next.mergedFrom
           merged = new Tile(positions.next, tile.value * 2)
+          atom.emit "tileChanged", value: merged.value
           merged.mergedFrom = [
             tile
             next
@@ -547,6 +548,7 @@ GameManager::move = (direction) ->
 
           # Update the score
           self.score += merged.value
+          atom.emit "scoreChanged", value: self.score
 
           # The mighty 2048 tile
           self.won = true  if merged.value is 2048
@@ -709,12 +711,77 @@ class Atom2048View extends View
 
     atom.workspaceView.command "atom-2048:bossAway", => @bossAway()
 
+    atom.on "tileChanged", @tileUpdated
+    aton.on "scoreChanged", @scoreUpdated
+
   # Returns an object that can be retrieved when package is activated
   serialize: ->
 
   # Tear down any state and detach
   destroy: ->
     @detach()
+
+  # process tile event
+  tileUpdated: (event) =>
+    if event.value is 2048
+      atom.emit "achievement:unlock",
+        name: "Beat the game!"
+        requirement: "Congratulations adventurer, not everyone can do this!"
+        category: "Game Play"
+        package: "atom-2048"
+        points: 1600
+        iconURL: "http://gabrielecirulli.github.io/2048/meta/apple-touch-icon.png"
+    if event.value is 1024
+      atom.emit "achievement:unlock",
+        name: "Almost there!"
+        requirement: "You are half way to win the game!"
+        category: "Game Play"
+        package: "atom-2048"
+        points: 800
+        iconURL: "http://gabrielecirulli.github.io/2048/meta/apple-touch-icon.png"
+    if event.value >= 128
+      atom.emit "achievement:unlock",
+        name: "Got " + event.value
+        requirement: "First got " + event.value
+        category: "Game Play"
+        package: "atom-2048"
+        points: 100 * event.value / 128
+        iconURL: "http://gabrielecirulli.github.io/2048/meta/apple-touch-icon.png"
+
+  # process score event
+  scoreUpdated: (event) =>
+    if event.value >= 50000
+      atom.emit "achievement:unlock",
+        name: "100K!"
+        requirement: "YOU ARE MY GOD!!"
+        category: "Game Play"
+        package: "atom-2048"
+        points: 4000
+        iconURL: "http://gabrielecirulli.github.io/2048/meta/apple-touch-icon.png"
+    if event.value >= 50000
+      atom.emit "achievement:unlock",
+        name: "50K!"
+        requirement: "Are you kidding me??"
+        category: "Game Play"
+        package: "atom-2048"
+        points: 2000
+        iconURL: "http://gabrielecirulli.github.io/2048/meta/apple-touch-icon.png"
+    if event.value >= 30000
+          atom.emit "achievement:unlock",
+            name: "30K!"
+            requirement: "Too high, too high, don't fall!"
+            category: "Game Play"
+            package: "atom-2048"
+            points: 1000
+            iconURL: "http://gabrielecirulli.github.io/2048/meta/apple-touch-icon.png"
+    if event.value >= 10000
+      atom.emit "achievement:unlock",
+        name: "10K!"
+        requirement: "No way!"
+        category: "Game Play"
+        package: "atom-2048"
+        points: 500
+        iconURL: "http://gabrielecirulli.github.io/2048/meta/apple-touch-icon.png"
 
   bossComing: ->
     KeyboardInputManager::stopListen()
@@ -734,3 +801,11 @@ class Atom2048View extends View
       window.requestAnimationFrame ->
         new GameManager(4, KeyboardInputManager, HTMLActuator, LocalScoreManager)
       atom.workspaceView.append(this)
+
+      atom.emit "achievement:unlock",
+        name: "Hello, adventurer!!"
+        requirement: "Launch 2048 game in atom"
+        category: "Game Play"
+        package: "atom-2048"
+        points: 100
+        iconURL: "http://gabrielecirulli.github.io/2048/meta/apple-touch-icon.png"
