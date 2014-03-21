@@ -712,7 +712,7 @@ class Atom2048View extends View
     atom.workspaceView.command "atom-2048:bossAway", => @bossAway()
 
     atom.on "tileChanged", @tileUpdated
-    aton.on "scoreChanged", @scoreUpdated
+    atom.on "scoreChanged", @scoreUpdated
 
   # Returns an object that can be retrieved when package is activated
   serialize: ->

@@ -4,7 +4,8 @@
   "version": "1.2.0",
   "description": "Play the interesting 2048 game right inside atom!",
   "activationEvents": [
-    "atom-2048:toggle"
+    "atom-2048:toggle",
+    "atom-2048:bossComing"
   ],
   "repository": "https://github.com/void-main/atom-2048",
   "license": "MIT",
