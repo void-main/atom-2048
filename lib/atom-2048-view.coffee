@@ -1,4 +1,6 @@
 {View} = require 'atom'
+AchievementsView = require './achievements-view'
+
 Tile = (position, value) ->
   @x = position.x
   @y = position.y
@@ -711,6 +713,7 @@ class Atom2048View extends View
 
     atom.workspaceView.command "atom-2048:bossAway", => @bossAway()
 
+    atom.on "atom2048:unlock", @achieve
     atom.on "tileChanged", @tileUpdated
     atom.on "scoreChanged", @scoreUpdated
 
@@ -721,10 +724,23 @@ class Atom2048View extends View
   destroy: ->
     @detach()
 
+  achieve: (event) ->
+     if atom.packages.isPackageActive("achievements")
+       atom.emit "achievement:unlock",
+         name: event.name
+         requirement: event.requirement
+         category: event.category
+         package: event.packageName
+         points: event.points
+         iconURL: event.iconURL
+     else
+       achievementsView = new AchievementsView
+       achievementsView.achieve()
+
   # process tile event
   tileUpdated: (event) =>
     if event.value is 2048
-      atom.emit "achievement:unlock",
+      atom.emit "atom2048:unlock",
         name: "Beat the game!"
         requirement: "Congratulations adventurer, not everyone can do this!"
         category: "Game Play"
@@ -732,7 +748,7 @@ class Atom2048View extends View
         points: 1600
         iconURL: "http://gabrielecirulli.github.io/2048/meta/apple-touch-icon.png"
     if event.value is 1024
-      atom.emit "achievement:unlock",
+      atom.emit "atom2048:unlock",
         name: "Almost there!"
         requirement: "You are half way to win the game!"
         category: "Game Play"
@@ -740,7 +756,7 @@ class Atom2048View extends View
         points: 800
         iconURL: "http://gabrielecirulli.github.io/2048/meta/apple-touch-icon.png"
     if event.value >= 128
-      atom.emit "achievement:unlock",
+      atom.emit "atom2048:unlock",
         name: "Got " + event.value
         requirement: "First got " + event.value
         category: "Game Play"
@@ -751,7 +767,7 @@ class Atom2048View extends View
   # process score event
   scoreUpdated: (event) =>
     if event.value >= 50000
-      atom.emit "achievement:unlock",
+      atom.emit "atom2048:unlock",
         name: "100K!"
         requirement: "YOU ARE MY GOD!!"
         category: "Game Play"
@@ -759,7 +775,7 @@ class Atom2048View extends View
         points: 4000
         iconURL: "http://gabrielecirulli.github.io/2048/meta/apple-touch-icon.png"
     if event.value >= 50000
-      atom.emit "achievement:unlock",
+      atom.emit "atom2048:unlock",
         name: "50K!"
         requirement: "Are you kidding me??"
         category: "Game Play"
@@ -767,7 +783,7 @@ class Atom2048View extends View
         points: 2000
         iconURL: "http://gabrielecirulli.github.io/2048/meta/apple-touch-icon.png"
     if event.value >= 30000
-          atom.emit "achievement:unlock",
+          atom.emit "atom2048:unlock",
             name: "30K!"
             requirement: "Too high, too high, don't fall!"
             category: "Game Play"
@@ -775,7 +791,7 @@ class Atom2048View extends View
             points: 1000
             iconURL: "http://gabrielecirulli.github.io/2048/meta/apple-touch-icon.png"
     if event.value >= 10000
-      atom.emit "achievement:unlock",
+      atom.emit "atom2048:unlock",
         name: "10K!"
         requirement: "No way!"
         category: "Game Play"
@@ -802,8 +818,8 @@ class Atom2048View extends View
         new GameManager(4, KeyboardInputManager, HTMLActuator, LocalScoreManager)
       atom.workspaceView.append(this)
 
-      atom.emit "achievement:unlock",
-        name: "Hello, adventurer!!!"
+      atom.emit "atom2048:unlock",
+        name: "Hello, adventurer!"
         requirement: "Launch 2048 game in atom"
         category: "Game Play"
         package: "atom-2048"
