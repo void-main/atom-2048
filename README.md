@@ -31,6 +31,7 @@ NOTE: to get achievements, you have to install [achievements package](https://at
 - 1.1.0 Add `boss-is-coming` mode as proposed by [@christhekeele](https://github.com/christhekeele) in issue [#1](https://github.com/void-main/atom-2048/issues/1)
 - 1.2.0 Add `achievement` system using [achievements package](https://atom.io/packages/achievements) developed by [@rgbkrk](https://github.com/rgbkrk). Reference issue [#2](https://github.com/void-main/atom-2048/issues/2)
 - 1.2.1 Fix the fatal [blocking `b` key issue](https://github.com/void-main/atom-2048/issues/3)!
+- 1.2.2 Add advertisement for achievements package
 
 ## Credits
 Credit goes to the fantastic [2048](https://github.com/gabrielecirulli/2048) game and the [original version 1024](https://play.google.com/store/apps/details?id=com.veewo.a1024).
