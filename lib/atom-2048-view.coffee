@@ -805,7 +805,7 @@ class Atom2048View extends View
     @detach()
 
   bossAway: ->
-    if @bossMode
+    if @bossMode and not @hasParent()
       atom.workspaceView.append(this)
       KeyboardInputManager::listen()
 
