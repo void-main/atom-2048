@@ -8,6 +8,6 @@
 # For more detailed documentation see
 # https://atom.io/docs/latest/advanced/keymaps
 '.workspace':
-  'b': 'atom-2048:bossComing'
+  'escape': 'atom-2048:bossComing'
   'ctrl-alt-a': 'atom-2048:toggle'
   'ctrl-alt-b': 'atom-2048:bossAway'

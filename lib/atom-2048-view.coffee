@@ -221,7 +221,7 @@ KeyboardInputManager::listener = (event) ->
   modifiers = event.altKey or event.ctrlKey or event.metaKey or event.shiftKey
   mapped = keymap[event.which]
   unless modifiers
-    event.preventDefault() unless event.which is 66 # b key for boss
+    event.preventDefault() unless event.which is 27 # esc key for boss
     if mapped isnt `undefined`
       @emit "move", mapped
     @restart.bind(this) event  if event.which is 32
