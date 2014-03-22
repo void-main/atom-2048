@@ -17,7 +17,7 @@ NOTE: all the directions arrows can cause the cursor move around the editor view
 ### boss-is-coming mode!
 We all know what `boss-is-coming` mode is! :P
 
-While playing the game, you simply hit `b` (for `back` or `boss` or whatever you can remember), and everything will be gone! But don't worry, your progress is not destoryed. Wherever you feel safe, simple press `ctrl-alt-b`, and everything will show up again.  A little heads up, if you accidentally hit `ctrl-alt-a`, your progress will not be preserved, so, use carefully!
+While playing the game, you simply hit `esc`, and everything will be gone! But don't worry, your progress is not destoryed. Wherever you feel safe, simple press `ctrl-alt-b`, and everything will show up again.  A little heads up, if you accidentally hit `ctrl-alt-a`, your progress will not be preserved, so, use carefully!
 
 ## Achievements
 With the help of [achievements package](https://atom.io/packages/achievements) developed by [@rgbkrk](https://github.com/rgbkrk), you can play the game and get achievements! See the image below!
@@ -32,6 +32,7 @@ NOTE: to get achievements, you have to install [achievements package](https://at
 - 1.2.0 Add `achievement` system using [achievements package](https://atom.io/packages/achievements) developed by [@rgbkrk](https://github.com/rgbkrk). Reference issue [#2](https://github.com/void-main/atom-2048/issues/2)
 - 1.2.1 Fix the fatal [blocking `b` key issue](https://github.com/void-main/atom-2048/issues/3)!
 - 1.2.2 Add advertisement for achievements package
+- 1.2.3 Change to `esc` key for `boss-is-coming` mode as discussed in issue [#3](https://github.com/void-main/atom-2048/issues/3)
 
 ## Credits
 Credit goes to the fantastic [2048](https://github.com/gabrielecirulli/2048) game and the [original version 1024](https://play.google.com/store/apps/details?id=com.veewo.a1024).
