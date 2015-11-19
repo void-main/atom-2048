@@ -1,8 +1,11 @@
 # See https://atom.io/docs/latest/creating-a-package#menus for more details
 'context-menu':
-  '.overlayer':
-      'Enable atom-2048': 'atom-2048:toggle'
-
+  'atom-text-editor': [
+    {
+      'label': 'Toggle atom-2048'
+      'command': 'atom-2048:toggle'
+    }
+  ]
 'menu': [
   {
     'label': 'Packages'

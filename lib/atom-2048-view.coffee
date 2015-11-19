@@ -1,5 +1,6 @@
-{View} = require 'atom'
+{View} = require 'atom-space-pen-views'
 AchievementsView = require './achievements-view'
+{CompositeDisposable, Emitter} = require 'atom'
 
 Tile = (position, value) ->
   @x = position.x
@@ -8,40 +9,19 @@ Tile = (position, value) ->
   @previousPosition = null
   @mergedFrom = null # Tracks tiles that merged together
   return
+
 Grid = (size) ->
   @size = size
   @cells = []
   @build()
   return
 
-# Build a grid of the specified size
-
-# Find the first available random position
-
-# Call callback for every cell
-
-# Check if there are any cells available
-
-# Check if the specified cell is taken
-
-# Inserts a tile at its position
-# Up
-# Right
-# Down
-# Left
-# vim keybindings
-# W
-# D
-# S
-# A
 KeyboardInputManager = ->
+  KeyboardInputManager::disposables = new CompositeDisposable()
   KeyboardInputManager::events = {}
   KeyboardInputManager::listen()
   return
 
-# Listen to swipe events
-
-# (right : left) : (down : up)
 HTMLActuator = ->
   @tileContainer = document.querySelector(".tile-container")
   @scoreContainer = document.querySelector(".score-container")
@@ -49,23 +29,7 @@ HTMLActuator = ->
   @messageContainer = document.querySelector(".game-message")
   @score = 0
   return
-# You lose
-# You win!
 
-# We can't use classlist because it somehow glitches when replacing classes
-
-# Make sure that the tile gets rendered in the previous position first
-# Update the position
-
-# Render the tiles that merged
-
-# Add the inner part of the tile to the wrapper
-
-# Put the tile on the board
-
-# IE only takes one value to remove at a time.
-
-# Continues the game (both restart and keep playing)
 LocalScoreManager = ->
   @key = "bestScore"
   supported = @localStorageSupported()
@@ -198,6 +162,10 @@ keymap =
   68: 1
   83: 2
   65: 3
+  38: 0
+  39: 1
+  40: 2
+  37: 3
 
 KeyboardInputManager::on = (event, callback) ->
   KeyboardInputManager::events[event] = []  unless KeyboardInputManager::events[event]
@@ -218,6 +186,7 @@ listenerFunc = (event) ->
   return
 
 KeyboardInputManager::listener = (event) ->
+  start = new Date().getTime()
   modifiers = event.altKey or event.ctrlKey or event.metaKey or event.shiftKey
   mapped = keymap[event.which]
   unless modifiers
@@ -230,7 +199,8 @@ KeyboardInputManager::listener = (event) ->
 
 KeyboardInputManager::listen = ->
   self = this
-  document.addEventListener "keydown", listenerFunc
+  atom.views.getView(atom.workspace).addEventListener "keydown", listenerFunc
+  # document.addEventListener "keydown", listenerFunc
   retry = document.querySelector(".retry-button")
   retry.addEventListener "click", @restart.bind(this)
   retry.addEventListener "touchend", @restart.bind(this)
@@ -263,7 +233,7 @@ KeyboardInputManager::listen = ->
   return
 
 KeyboardInputManager::stopListen = ->
-  document.removeEventListener "keydown", listenerFunc
+  atom.views.getView(atom.workspace).removeEventListener "keydown", listenerFunc
   return
 
 KeyboardInputManager::restart = (event) ->
@@ -537,7 +507,7 @@ GameManager::move = (direction) ->
         # Only one merger per row traversal?
         if next and next.value is tile.value and not next.mergedFrom
           merged = new Tile(positions.next, tile.value * 2)
-          atom.emit "tileChanged", value: merged.value
+          atom.emitter.emit "tileChanged", value: merged.value
           merged.mergedFrom = [
             tile
             next
@@ -550,7 +520,7 @@ GameManager::move = (direction) ->
 
           # Update the score
           self.score += merged.value
-          atom.emit "scoreChanged", value: self.score
+          atom.emitter.emit "scoreChanged", value: self.score
 
           # The mighty 2048 tile
           self.won = true  if merged.value is 2048
@@ -662,7 +632,10 @@ GameManager::positionsEqual = (first, second) ->
 
 module.exports =
 class Atom2048View extends View
+  @disposables = null
+  @emitter = new Emitter
   @bossMode = false
+  @panel = null
 
   @content: ->
     @div class: 'atom-2048 overlay from-top', =>
@@ -703,30 +676,34 @@ class Atom2048View extends View
 
   initialize: (serializeState) ->
     @bossMode = false
-    atom.workspaceView.command "atom-2048:toggle", => @toggle()
+    @disposables = new CompositeDisposable
+    @emitter = new Emitter
 
-    atom.workspaceView.command "atom-2048:bossComing", (e) =>
-      if @hasParent()
+    @disposables.add atom.commands.add 'atom-workspace', "atom-2048:toggle", => @toggle()
+    @disposables.add atom.commands.add 'atom-workspace', "atom-2048:bossComing", (e) =>
+      if @panel?.isVisible()
         @bossComing()
       else
         e.abortKeyBinding()
 
-    atom.workspaceView.command "atom-2048:bossAway", => @bossAway()
+    @disposables.add atom.commands.add 'atom-workspace', "atom-2048:bossAway", => @bossAway()
 
-    atom.on "atom2048:unlock", @achieve
-    atom.on "tileChanged", @tileUpdated
-    atom.on "scoreChanged", @scoreUpdated
+    @emitter.on "atom2048:unlock", @achieve
+    @emitter.on "tileChanged", @tileUpdated
+    @emitter.on "scoreChanged", @scoreUpdated
 
   # Returns an object that can be retrieved when package is activated
   serialize: ->
 
   # Tear down any state and detach
   destroy: ->
+    @disposables.dispose()
+    @emitter.dispose()
     @detach()
 
   achieve: (event) ->
      if atom.packages.isPackageActive("achievements")
-       atom.emit "achievement:unlock",
+       atom.emitter.emit "achievement:unlock",
          name: event.name
          requirement: event.requirement
          category: event.category
@@ -740,7 +717,7 @@ class Atom2048View extends View
   # process tile event
   tileUpdated: (event) =>
     if event.value is 2048
-      atom.emit "atom2048:unlock",
+      atom.emitter.emit "atom2048:unlock",
         name: "Beat the game!"
         requirement: "Congratulations adventurer, not everyone can do this!"
         category: "Game Play"
@@ -748,7 +725,7 @@ class Atom2048View extends View
         points: 1600
         iconURL: "http://gabrielecirulli.github.io/2048/meta/apple-touch-icon.png"
     if event.value is 1024
-      atom.emit "atom2048:unlock",
+      atom.emitter.emit "atom2048:unlock",
         name: "Almost there!"
         requirement: "You are half way to win the game!"
         category: "Game Play"
@@ -756,7 +733,7 @@ class Atom2048View extends View
         points: 800
         iconURL: "http://gabrielecirulli.github.io/2048/meta/apple-touch-icon.png"
     if event.value >= 128
-      atom.emit "atom2048:unlock",
+      atom.emitter.emit "atom2048:unlock",
         name: "Got " + event.value
         requirement: "First got " + event.value
         category: "Game Play"
@@ -767,7 +744,7 @@ class Atom2048View extends View
   # process score event
   scoreUpdated: (event) =>
     if event.value >= 50000
-      atom.emit "atom2048:unlock",
+      atom.emitter.emit "atom2048:unlock",
         name: "100K!"
         requirement: "YOU ARE MY GOD!!"
         category: "Game Play"
@@ -775,7 +752,7 @@ class Atom2048View extends View
         points: 4000
         iconURL: "http://gabrielecirulli.github.io/2048/meta/apple-touch-icon.png"
     if event.value >= 50000
-      atom.emit "atom2048:unlock",
+      atom.emitter.emit "atom2048:unlock",
         name: "50K!"
         requirement: "Are you kidding me??"
         category: "Game Play"
@@ -783,7 +760,7 @@ class Atom2048View extends View
         points: 2000
         iconURL: "http://gabrielecirulli.github.io/2048/meta/apple-touch-icon.png"
     if event.value >= 30000
-          atom.emit "atom2048:unlock",
+          atom.emitter.emit "atom2048:unlock",
             name: "30K!"
             requirement: "Too high, too high, don't fall!"
             category: "Game Play"
@@ -791,7 +768,7 @@ class Atom2048View extends View
             points: 1000
             iconURL: "http://gabrielecirulli.github.io/2048/meta/apple-touch-icon.png"
     if event.value >= 10000
-      atom.emit "atom2048:unlock",
+      atom.emitter.emit "atom2048:unlock",
         name: "10K!"
         requirement: "No way!"
         category: "Game Play"
@@ -802,23 +779,26 @@ class Atom2048View extends View
   bossComing: ->
     KeyboardInputManager::stopListen()
     @bossMode = true
-    @detach()
+    @panel?.hide()
 
   bossAway: ->
-    if @bossMode and not @hasParent()
-      atom.workspaceView.append(this)
+    if @bossMode and not @panel?.isVisible()
+      @panel ?= atom.workspace.addTopPanel(item: this)
+      @panel.show()
       KeyboardInputManager::listen()
 
   toggle: ->
-    if @hasParent()
+    if @panel?.isVisible()
       KeyboardInputManager::stopListen()
-      @detach()
+      @panel?.hide()
     else
       window.requestAnimationFrame ->
         new GameManager(4, KeyboardInputManager, HTMLActuator, LocalScoreManager)
-      atom.workspaceView.append(this)
 
-      atom.emit "atom2048:unlock",
+      @panel ?= atom.workspace.addTopPanel(item: this)
+      @panel.show()
+
+      atom.emitter.emit "atom2048:unlock",
         name: "Hello, adventurer!"
         requirement: "Launch 2048 game in atom"
         category: "Game Play"

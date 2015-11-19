@@ -12,12 +12,12 @@ After installation, you can find the toggle in menu `Packages -> atom-2048`, or 
 
 Once the view is loaded as demonstrated in the gif animation above, you can play the game simply as you are in a browser. You'll see your high scores, and you can reset the game by hit `spacebar`. Go wild!
 
-NOTE: all the directions arrows can cause the cursor move around the editor view, so they are disabled in `atom-2048`, you can use `WASD` keys or `vim` keys to move the tiles!
+NOTE: all the directions arrows can cause the cursor move around the editor view, so they are disabled in `atom-2048`, you can use direction keys, `WASD` keys or `vim` keys to move the tiles!
 
 ### boss-is-coming mode!
 We all know what `boss-is-coming` mode is! :P
 
-While playing the game, you simply hit `esc`, and everything will be gone! But don't worry, your progress is not destoryed. Wherever you feel safe, simple press `ctrl-alt-b`, and everything will show up again.  A little heads up, if you accidentally hit `ctrl-alt-a`, your progress will not be preserved, so, use carefully!
+While playing the game, you simply hit `esc`, and everything will be gone! But don't worry, your progress is not destoryed. Wherever you feel safe, simple press `ctrl-alt-c`, and everything will show up again.  A little heads up, if you accidentally hit `ctrl-alt-a`, your progress will not be preserved, so, use carefully!
 
 ## Achievements
 With the help of [achievements package](https://atom.io/packages/achievements) developed by [@rgbkrk](https://github.com/rgbkrk), you can play the game and get achievements! See the image below!
@@ -33,6 +33,10 @@ NOTE: to get achievements, you have to install [achievements package](https://at
 - 1.2.1 Fix the fatal [blocking `b` key issue](https://github.com/void-main/atom-2048/issues/3)!
 - 1.2.2 Add advertisement for achievements package
 - 1.2.3 Change to `esc` key for `boss-is-coming` mode as discussed in issue [#3](https://github.com/void-main/atom-2048/issues/3)
+- 2.0.0 Remove some deprecated APIs for new version of atom
+
+## Known issue
+With new atom, I can't use `document.addEventListener`, but using `atom.views.getView(atom.workspace).addEventListener "keydown"` will not prevent keydown event to atom workspace. So, when you play the game with editor view open, you can see the cursor is moving when you press direction keys.
 
 ## Credits
 Credit goes to the fantastic [2048](https://github.com/gabrielecirulli/2048) game and the [original version 1024](https://play.google.com/store/apps/details?id=com.veewo.a1024).

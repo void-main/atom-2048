@@ -1,6 +1,6 @@
 Atom2048View = require './atom-2048-view'
 
-module.exports =
+module.exports = Atom2048 =
   atom2048View: null
 
   activate: (state) ->

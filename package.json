@@ -1,7 +1,7 @@
 {
   "name": "atom-2048",
   "main": "./lib/atom-2048",
-  "version": "1.2.3",
+  "version": "2.0.0",
   "description": "Play the interesting 2048 game right inside atom!",
   "activationEvents": [
     "atom-2048:toggle",
@@ -10,7 +10,9 @@
   "repository": "https://github.com/void-main/atom-2048",
   "license": "MIT",
   "engines": {
-    "atom": ">0.50.0"
+    "atom": ">=1.0.0 <2.0.0"
   },
-  "dependencies": {}
+  "dependencies": {
+    "atom-space-pen-views": "^2.0.3"
+  }
 }
