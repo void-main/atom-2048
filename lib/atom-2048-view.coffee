@@ -44,6 +44,7 @@ GameManager = (size, InputManager, Actuator, ScoreManager) ->
   @inputManager.on "move", @move.bind(this)
   @inputManager.on "restart", @restart.bind(this)
   @inputManager.on "keepPlaying", @keepPlaying.bind(this)
+  @inputManager.on "shake", @shake.bind(this)
   @setup()
   return
 (->
@@ -192,6 +193,7 @@ KeyboardInputManager::listener = (event) ->
   unless modifiers
     event.preventDefault() unless event.which is 27 # esc key for boss
     if mapped isnt `undefined`
+      @emit "shake"
       @emit "move", mapped
     @restart.bind(this) event  if event.which is 32
 
@@ -479,7 +481,6 @@ GameManager::moveTile = (tile, cell) ->
 
 # Move tiles on the grid in the specified direction
 GameManager::move = (direction) ->
-
   # 0: up, 1: right, 2:down, 3: left
   self = this
   return  if @isGameTerminated() # Don't do anything if the game's over
@@ -629,6 +630,22 @@ GameManager::tileMatchesAvailable = ->
 
 GameManager::positionsEqual = (first, second) ->
   first.x is second.x and first.y is second.y
+
+GameManager::shake = ()->
+    if atom.config.get('atom-2048.Enable Power Mode')
+      topPanels = atom.workspace.getTopPanels()
+      view = atom.views.getView(topPanels[0])
+      intensity = 1 + atom.config.get('atom-2048.Power Level') * Math.random()
+      x = intensity * (if Math.random() > 0.5 then -1 else 1)
+      y = intensity * (if Math.random() > 0.5 then -1 else 1)
+
+      view.style.top = "#{y}px"
+      view.style.left = "#{x}px"
+
+      setTimeout =>
+        view.style.top = ""
+        view.style.left = ""
+      , 75
 
 module.exports =
 class Atom2048View extends View
